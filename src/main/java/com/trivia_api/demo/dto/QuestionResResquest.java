@@ -2,7 +2,7 @@ package com.trivia_api.demo.dto;
 
 import java.util.List;
 
-public record QuestionResResponde(String category,
+public record QuestionResResquest(String category,
                                   String type,
                                   String difficulty,
                                   String question,

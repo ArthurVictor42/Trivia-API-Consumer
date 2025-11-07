@@ -1,9 +1,7 @@
 package com.trivia_api.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.trivia_api.demo.dto.QuestionResResponse;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "question")
 public class Question {
 
     @Id
@@ -27,5 +26,10 @@ public class Question {
     private String difficulty;
     private String question;
     private String correct_answer;
+
+    @ElementCollection
+    @CollectionTable(name = "incorrect_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "incorrect_answer")
     private List<String> incorrect_answers;
+
 }

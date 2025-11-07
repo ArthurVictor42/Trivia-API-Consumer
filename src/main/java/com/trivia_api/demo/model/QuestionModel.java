@@ -1,6 +1,6 @@
 package com.trivia_api.demo.model;
 
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,20 +12,17 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "question_model")
 public class QuestionModel {
-    private int response_code;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private int response_code; // 0 = API, 1 = Local
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "question_model_id")
     private List<Question> results;
-
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class Question {
-        private String category;
-        private String type;
-        private String difficulty;
-        private String question;
-        private String correct_answer;
-        private List<String> incorrect_answers;
-    }
 }
