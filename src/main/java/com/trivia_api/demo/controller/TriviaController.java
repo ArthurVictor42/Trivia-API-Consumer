@@ -15,8 +15,9 @@ public class TriviaController {
         this.triviaClient = triviaClient;
     }
 
-    @GetMapping("/trivia")
-    public QuestionResponse getTrivia(@RequestParam(defaultValue = "12") int amount) {
+    // GET http://localhost:8080/trivia-api?amount=10 --> Amount serve pra buscar uma quantidade de questão, sendo o default 10
+    @GetMapping("/trivia-api")
+    public QuestionResponse getTrivia(@RequestParam(defaultValue = "10") int amount) {
         return triviaClient.getTrivia(amount);
     }
 }
