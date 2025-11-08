@@ -1,19 +1,19 @@
 package com.trivia_api.demo.convert;
 
 import com.trivia_api.demo.dto.QuestionResponse;
-import com.trivia_api.demo.model.Question;
 import com.trivia_api.demo.model.QuestionModel;
+import com.trivia_api.demo.model.TriviaModel;
 
 import java.util.List;
 
 public class QuestionConvert {
-    public static QuestionModel convert(QuestionResponse questionResponse) {
-        QuestionModel model = new QuestionModel();
+    public static TriviaModel convert(QuestionResponse questionResponse) {
+        TriviaModel model = new TriviaModel();
         model.setResponse_code(questionResponse.response_code());
 
         // Converte os response em entidade
-        List<Question> questions = questionResponse.results().stream()
-                .map(q -> new Question(
+        List<QuestionModel> questions = questionResponse.results().stream()
+                .map(q -> new QuestionModel(
                         null, // id gerado automaticamente
                         q.category(),
                         q.type(),

@@ -1,10 +1,10 @@
 package com.trivia_api.demo.Service;
 
 import com.trivia_api.demo.Repository.QuestionRepository;
-import com.trivia_api.demo.dto.QuestionResResponse;
+import com.trivia_api.demo.dto.TriviaResponse;
 import com.trivia_api.demo.dto.QuestionResponse;
-import com.trivia_api.demo.model.Question;
 import com.trivia_api.demo.model.QuestionModel;
+import com.trivia_api.demo.model.TriviaModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +18,11 @@ public class QuestionService {
     private QuestionRepository questionRepository;
 
     public void inserir(QuestionResponse questionResponse) {
-        QuestionModel model = new QuestionModel();
+        TriviaModel model = new TriviaModel();
         model.setResponse_code(questionResponse.response_code());
 
-        List<Question> questions = questionResponse.results().stream()
-                .map(q -> new Question(
+        List<QuestionModel> questions = questionResponse.results().stream()
+                .map(q -> new QuestionModel(
                         null,
                         q.category(),
                         q.type(),
@@ -43,7 +43,7 @@ public class QuestionService {
                 .map(model -> new QuestionResponse(
                         model.getResponse_code(),
                         model.getResults().stream()
-                                .map(q -> new QuestionResResponse(
+                                .map(q -> new TriviaResponse(
                                         q.getCategory(),
                                         q.getType(),
                                         q.getDifficulty(),
@@ -62,7 +62,7 @@ public class QuestionService {
                 .map(model -> new QuestionResponse(
                         model.getResponse_code(),
                         model.getResults().stream()
-                                .map(q -> new QuestionResResponse(
+                                .map(q -> new TriviaResponse(
                                         q.getCategory(),
                                         q.getType(),
                                         q.getDifficulty(),
@@ -76,7 +76,7 @@ public class QuestionService {
     }
 
     public void atualizarQuestao(long id, QuestionResponse questionRequest) {
-        QuestionModel model = questionRepository.findById(id)
+        TriviaModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("QuestionModel com ID " + id + " não encontrado."));
 
         model.setResponse_code(questionRequest.response_code());
@@ -85,7 +85,7 @@ public class QuestionService {
         model.getResults().clear();
 
         questionRequest.results().forEach(q -> {
-            Question question = new Question();
+            QuestionModel question = new QuestionModel();
             question.setCategory(q.category());
             question.setType(q.type());
             question.setDifficulty(q.difficulty());
@@ -100,7 +100,7 @@ public class QuestionService {
     }
 
     public void deletarQuestao(long id) {
-        QuestionModel model = questionRepository.findById(id)
+        TriviaModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("QuestionModel com ID " + id + " não encontrado."));
 
         questionRepository.delete(model);
