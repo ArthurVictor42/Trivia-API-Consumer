@@ -17,6 +17,7 @@ public class QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
 
+    // Salva um novo conjunto de perguntas no banco
     public void inserir(QuestionResponse questionResponse) {
         TriviaModel model = new TriviaModel();
         model.setResponse_code(questionResponse.response_code());
@@ -37,7 +38,7 @@ public class QuestionService {
 
         questionRepository.save(model);
     }
-
+    // Busca um registro pelo ID e converte de volta pra QuestionResponse
     public QuestionResponse buscarId(long id) {
         return questionRepository.findById(id)
                 .map(model -> new QuestionResponse(
@@ -56,6 +57,7 @@ public class QuestionService {
                 .orElseThrow(() -> new RuntimeException("QuestionModel com ID " + id + " não encontrado."));
     }
 
+    // Retorna todos os registros do banco convertidos em QuestionResponse
     public List<QuestionResponse> buscarTodos() {
         return questionRepository.findAll()
                 .stream()
@@ -74,14 +76,14 @@ public class QuestionService {
                 ))
                 .toList();
     }
-
+    // Atualiza um registro existente com novas perguntas
     public void atualizarQuestao(long id, QuestionResponse questionRequest) {
         TriviaModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("QuestionModel com ID " + id + " não encontrado."));
 
         model.setResponse_code(questionRequest.response_code());
 
-        // Evita trocar a referência da lista
+        // Limpa as perguntas antigas e adiciona as novas
         model.getResults().clear();
 
         questionRequest.results().forEach(q -> {
@@ -98,7 +100,7 @@ public class QuestionService {
 
         questionRepository.save(model);
     }
-
+    // Deleta um registro do banco pelo ID
     public void deletarQuestao(long id) {
         TriviaModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("QuestionModel com ID " + id + " não encontrado."));
