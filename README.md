@@ -2,5 +2,5 @@
 - Arthur Victor
 - Wagner Francisco
 - Kauã Santiago
-- Wermeson Mateus
+- Wemerson Matheus
 - Pedro Henrique
