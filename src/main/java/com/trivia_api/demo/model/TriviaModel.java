@@ -13,16 +13,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "question_model")
+@Table(name = "trivia_question")
 public class TriviaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int response_code; // 0 = API, 1 = Local
+    private String category;
+    private String type;
+    private String difficulty;
+    private String question;
+    private String correct_answer;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "question_model_id")
-    private List<QuestionModel> results;
+    @ElementCollection
+    @CollectionTable(name = "incorrect_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "incorrect_answer")
+    private List<String> incorrect_answers;
+
 }
