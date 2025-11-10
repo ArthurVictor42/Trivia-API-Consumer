@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.List;
 
 @Getter
@@ -27,8 +26,7 @@ public class TriviaModel {
     private String correct_answer;
 
     @ElementCollection
-    @CollectionTable(name = "incorrect_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @CollectionTable(name = "incorrect_answers", joinColumns = @JoinColumn(name = "trivia_id"))
     @Column(name = "incorrect_answer")
     private List<String> incorrect_answers;
-
 }

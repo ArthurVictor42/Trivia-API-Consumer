@@ -1,8 +1,10 @@
 package com.trivia_api.demo.Service;
 
 import com.trivia_api.demo.Repository.QuestionRepository;
+import com.trivia_api.demo.dto.QuestionRequest;
 import com.trivia_api.demo.dto.TriviaResponse;
 import com.trivia_api.demo.dto.QuestionResponse;
+import com.trivia_api.demo.dto.TriviaResquest;
 import com.trivia_api.demo.model.TriviaModel;
 import com.trivia_api.demo.model.QuestionModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +23,11 @@ public class QuestionService {
     // Metodos paras os bloco
 
     // Salva um novo conjunto de perguntas no banco
-    public void inserir(QuestionResponse questionResponse) {
+    public void inserir(QuestionRequest questionRequest) {
         QuestionModel model = new QuestionModel();
-        model.setResponse_code(questionResponse.response_code());
+        model.setResponse_code(questionRequest.response_code());
 
-        List<TriviaModel> questions = questionResponse.results().stream()
+        List<TriviaModel> questions = questionRequest.results().stream()
                 .map(q -> new TriviaModel(
                         null,
                         q.category(),
@@ -38,7 +40,6 @@ public class QuestionService {
                 .toList();
 
         model.setResults(questions);
-
         questionRepository.save(model);
     }
 
@@ -58,7 +59,7 @@ public class QuestionService {
                                 ))
                                 .toList()
                 ))
-                .orElseThrow(() -> new RuntimeException("Questão  não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Bloco  não encontrada."));
     }
 
     // Retorna todos os registros do banco convertidos em QuestionResponse
@@ -82,7 +83,7 @@ public class QuestionService {
     }
 
     // Atualiza um registro existente com novas perguntas
-    public void atualizarQuestao(long id, QuestionResponse questionRequest) {
+    public void atualizarQuestao(long id, QuestionRequest questionRequest) {
         QuestionModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Questão não encontrada."));
 
@@ -154,8 +155,25 @@ public class QuestionService {
         QuestionModel bloco = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bloco não encontrado."));
 
+        // Remove ao encontra a questão no bloco
         bloco.getResults().removeIf(q -> q.getId().equals(questionId));
 
+        questionRepository.save(bloco);
+    }
+
+    public void adicionarQuestaoAoBloco(long id, TriviaResquest triviaRequest) {
+        QuestionModel bloco = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrado."));
+
+        TriviaModel novaQuestao = new TriviaModel();
+        novaQuestao.setCategory(triviaRequest.category());
+        novaQuestao.setType(triviaRequest.type());
+        novaQuestao.setDifficulty(triviaRequest.difficulty());
+        novaQuestao.setQuestion(triviaRequest.question());
+        novaQuestao.setCorrect_answer(triviaRequest.correct_answer());
+        novaQuestao.setIncorrect_answers(triviaRequest.incorrect_answers());
+
+        bloco.getResults().add(novaQuestao);
         questionRepository.save(bloco);
     }
 }
