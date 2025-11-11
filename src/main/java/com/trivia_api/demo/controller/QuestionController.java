@@ -2,10 +2,7 @@ package com.trivia_api.demo.controller;
 
 import com.trivia_api.demo.Service.QuestionService;
 import com.trivia_api.demo.client.TriviaClient;
-import com.trivia_api.demo.dto.QuestionRequest;
-import com.trivia_api.demo.dto.QuestionResponse;
-import com.trivia_api.demo.dto.TriviaResponse;
-import com.trivia_api.demo.dto.TriviaResquest;
+import com.trivia_api.demo.dto.*;
 import com.trivia_api.demo.model.TriviaModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,7 +28,7 @@ public class QuestionController {
 
     // GET http://localhost:8080/trivia/api?amount=10 --> Amount serve pra buscar uma quantidade de questão, sendo o default 10
     @GetMapping("/api")
-    public QuestionResponse getTrivia(@RequestParam(defaultValue = "10") int amount) {
+    public BlockResponse getTrivia(@RequestParam(defaultValue = "10") int amount) {
         return triviaClient.getTrivia(amount);
     }
 
@@ -40,14 +37,14 @@ public class QuestionController {
 
     // POST http://localhost:8080/trivia/local
     @PostMapping("/local")
-    public ResponseEntity<Void> CriarBloco(@RequestBody QuestionRequest questionRequest) {
+    public ResponseEntity<Void> CriarBloco(@RequestBody BlockRequest questionRequest) {
         questionService.inserir(questionRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     // GET http://localhost:8080/trivia/local/{id}
     @GetMapping("/local/{id}")
-    public ResponseEntity<QuestionResponse> BuscarBloco(@PathVariable long id) {
+    public ResponseEntity<BlockResponse> BuscarBloco(@PathVariable long id) {
         var trivia = questionService.buscarId(id);
 
         return ResponseEntity.ok(trivia);
@@ -55,7 +52,7 @@ public class QuestionController {
 
     // GET http://localhost:8080/trivia/locals
     @GetMapping("locals")
-    public ResponseEntity<List<QuestionResponse>> BuscarTodos() {
+    public ResponseEntity<List<BlockResponse>> BuscarTodos() {
         var trivias = questionService.buscarTodos();
 
         return ResponseEntity.ok(trivias);
@@ -64,7 +61,7 @@ public class QuestionController {
     // PUT http://localhost:8080/trivia/local/{id}
     @PutMapping("/local/{id}")
     public ResponseEntity<Void> AtualizarBloco(@PathVariable long id,
-                                               @RequestBody QuestionRequest questionRequest) {
+                                               @RequestBody BlockRequest questionRequest) {
         questionService.atualizarQuestao(id, questionRequest);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -114,5 +111,28 @@ public class QuestionController {
                                                @RequestParam long questionId) {
         questionService.deletarquestoaid(id, questionId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Metodos de rodadas de questão!
+    // GET http://localhost:8080/trivia/local/1/quiz/start?quantidade=3&difficulty=fácil ---> Exemplo de envio
+    @GetMapping("/local/{id}/quiz/start")
+    public ResponseEntity<List<QuizPerguntaResponse>> iniciarRodada(
+            @RequestParam long id,
+            @RequestParam(defaultValue = "5") int quantidade,
+            @RequestParam(required = false) String difficulty) {
+
+        var perguntas = questionService.iniciarRodada(id, quantidade, difficulty);
+
+        return ResponseEntity.ok(perguntas);
+
+    }
+
+    // POST http://localhost:8080/trivia/local/1/quiz/submit
+    @PostMapping("/local/{id}/quiz/submit")
+    public ResponseEntity<QuizResultadoResponse> responderRodada(@PathVariable long id,
+                                                                 @RequestBody List<QuizRespostaRequest> respostas){
+        var resultado = questionService.corrigirRodada(id, respostas);
+
+        return ResponseEntity.ok(resultado);
     }
 }

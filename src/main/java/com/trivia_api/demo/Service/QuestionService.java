@@ -1,17 +1,18 @@
 package com.trivia_api.demo.Service;
 
 import com.trivia_api.demo.Repository.QuestionRepository;
-import com.trivia_api.demo.dto.QuestionRequest;
-import com.trivia_api.demo.dto.TriviaResponse;
-import com.trivia_api.demo.dto.QuestionResponse;
-import com.trivia_api.demo.dto.TriviaResquest;
+import com.trivia_api.demo.dto.*;
 import com.trivia_api.demo.model.TriviaModel;
 import com.trivia_api.demo.model.QuestionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class QuestionService {
@@ -23,7 +24,7 @@ public class QuestionService {
     // Metodos paras os bloco
 
     // Salva um novo conjunto de perguntas no banco
-    public void inserir(QuestionRequest questionRequest) {
+    public void inserir(BlockRequest questionRequest) {
         QuestionModel model = new QuestionModel();
         model.setResponse_code(questionRequest.response_code());
 
@@ -44,9 +45,9 @@ public class QuestionService {
     }
 
     // Busca um registro pelo ID e converte de volta pra QuestionResponse
-    public QuestionResponse buscarId(long id) {
+    public BlockResponse buscarId(long id) {
         return questionRepository.findById(id)
-                .map(model -> new QuestionResponse(
+                .map(model -> new BlockResponse(
                         model.getResponse_code(),
                         model.getResults().stream()
                                 .map(q -> new TriviaResponse(
@@ -63,10 +64,10 @@ public class QuestionService {
     }
 
     // Retorna todos os registros do banco convertidos em QuestionResponse
-    public List<QuestionResponse> buscarTodos() {
+    public List<BlockResponse> buscarTodos() {
         return questionRepository.findAll()
                 .stream()
-                .map(model -> new QuestionResponse(
+                .map(model -> new BlockResponse(
                         model.getResponse_code(),
                         model.getResults().stream()
                                 .map(q -> new TriviaResponse(
@@ -83,7 +84,7 @@ public class QuestionService {
     }
 
     // Atualiza um registro existente com novas perguntas
-    public void atualizarQuestao(long id, QuestionRequest questionRequest) {
+    public void atualizarQuestao(long id, BlockRequest questionRequest) {
         QuestionModel model = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Questão não encontrada."));
 
@@ -161,6 +162,7 @@ public class QuestionService {
         questionRepository.save(bloco);
     }
 
+    // Adiciona uma nova questão ao bloco escolhido
     public void adicionarQuestaoAoBloco(long id, TriviaResquest triviaRequest) {
         QuestionModel bloco = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bloco não encontrado."));
@@ -175,5 +177,73 @@ public class QuestionService {
 
         bloco.getResults().add(novaQuestao);
         questionRepository.save(bloco);
+    }
+
+    // Exibe Uma quantidade N de perguntas na rodada
+    public List<QuizPerguntaResponse> iniciarRodada(long id, int quantidade, String difficulty) {
+        QuestionModel bloco = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrado."));
+
+        // Filtra por dificuldade (se for informada)
+        Stream<TriviaModel> stream = bloco.getResults().stream();
+        if (difficulty != null && !difficulty.isBlank()) {
+            stream = stream.filter(q -> q.getDifficulty().equalsIgnoreCase(difficulty));
+        }
+
+        // Limita e coleta as perguntas
+        List<TriviaModel> perguntas = stream
+                .limit(quantidade)
+                .collect(Collectors.toList());
+
+        // Monta o DTO de exibição (sem resposta correta)
+        return perguntas.stream().map(q -> {
+            List<String> opcoes = new ArrayList<>(q.getIncorrect_answers());
+            opcoes.add(q.getCorrect_answer());
+            Collections.shuffle(opcoes);
+
+            return new QuizPerguntaResponse(
+                    q.getId(),
+                    q.getCategory(),
+                    q.getType(),
+                    q.getDifficulty(),
+                    q.getQuestion(),
+                    opcoes
+            );
+        }).toList();
+    }
+
+    public QuizResultadoResponse corrigirRodada(long id, List<QuizRespostaRequest> respostas) {
+        QuestionModel bloco = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrado."));
+
+        int acertos = 0;
+        List<QuizResultadoResponse.ResultadoTotal> detalhes = new ArrayList<>();
+
+        for (QuizRespostaRequest r : respostas) {
+            TriviaModel questao = bloco.getResults().stream()
+                    .filter(q -> q.getId().equals(r.idPergunta()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Pergunta não encontrada."));
+
+            String respostaUsuario = r.resposta() != null ? r.resposta() : "";
+            String respostaCorreta = questao.getCorrect_answer() != null ? questao.getCorrect_answer() : "";
+
+            boolean acertou = respostaCorreta.equalsIgnoreCase(respostaUsuario);
+            if (acertou) {
+                acertos++;
+            }
+
+            detalhes.add(new QuizResultadoResponse.ResultadoTotal(
+                    questao.getQuestion(),
+                    respostaUsuario,
+                    respostaCorreta,
+                    acertou
+            ));
+        }
+
+        int total = respostas.size();
+        int erros = total - acertos;
+
+        return new QuizResultadoResponse(total, acertos, erros, detalhes);
     }
 }

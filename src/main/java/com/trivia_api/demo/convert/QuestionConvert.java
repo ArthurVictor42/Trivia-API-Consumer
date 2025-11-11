@@ -1,13 +1,13 @@
 package com.trivia_api.demo.convert;
 
-import com.trivia_api.demo.dto.QuestionResponse;
+import com.trivia_api.demo.dto.BlockResponse;
 import com.trivia_api.demo.model.TriviaModel;
 import com.trivia_api.demo.model.QuestionModel;
 
 import java.util.List;
 
 public class QuestionConvert {
-    public static QuestionModel convert(QuestionResponse questionResponse) {
+    public static QuestionModel convert(BlockResponse questionResponse) {
         QuestionModel model = new QuestionModel();
         model.setResponse_code(questionResponse.response_code());
 
