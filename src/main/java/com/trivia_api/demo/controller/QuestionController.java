@@ -112,27 +112,4 @@ public class QuestionController {
         questionService.deletarquestoaid(id, questionId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    // Metodos de rodadas de questão!
-    // GET http://localhost:8080/trivia/local/1/quiz/start?quantidade=3&difficulty=fácil ---> Exemplo de envio
-    @GetMapping("/local/{id}/quiz/start")
-    public ResponseEntity<List<QuizPerguntaResponse>> iniciarRodada(
-            @RequestParam long id,
-            @RequestParam(defaultValue = "5") int quantidade,
-            @RequestParam(required = false) String difficulty) {
-
-        var perguntas = questionService.iniciarRodada(id, quantidade, difficulty);
-
-        return ResponseEntity.ok(perguntas);
-
-    }
-
-    // POST http://localhost:8080/trivia/local/1/quiz/submit
-    @PostMapping("/local/{id}/quiz/submit")
-    public ResponseEntity<QuizResultadoResponse> responderRodada(@PathVariable long id,
-                                                                 @RequestBody List<QuizRespostaRequest> respostas){
-        var resultado = questionService.corrigirRodada(id, respostas);
-
-        return ResponseEntity.ok(resultado);
-    }
 }
