@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,7 +59,7 @@ public class QuestionService {
                                 ))
                                 .toList()
                 ))
-                .orElseThrow(() -> new RuntimeException("Bloco  não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrada."));
     }
 
     // Retorna todos os registros do banco convertidos em QuestionResponse
@@ -86,7 +85,7 @@ public class QuestionService {
     // Atualiza um registro existente com novas perguntas
     public void atualizarQuestao(long id, BlockRequest questionRequest) {
         QuestionModel model = questionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Questão não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrada."));
 
         model.setResponse_code(questionRequest.response_code());
 
@@ -108,10 +107,11 @@ public class QuestionService {
         questionRepository.save(model);
     }
 
+
     // Deleta um registro do banco pelo ID
     public void deletarQuestao(long id) {
         QuestionModel model = questionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Questão não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Bloco não encontrada."));
 
         questionRepository.delete(model);
     }
